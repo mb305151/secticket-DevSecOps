@@ -1,0 +1,50 @@
+%%{init: {'theme':'base','themeVariables':{'primaryTextColor':'#1a1a2e','textColor':'#1a1a2e','titleColor':'#1a1a2e','lineColor':'#33415c','edgeLabelBackground':'#ffffff','fontSize':'15px'}}}%%
+flowchart LR
+    subgraph ALL["SecTicket: schemat działania aplikacji i pipeline DevSecOps"]
+        DEVN["Zespół<br/>commit / pull request<br/>(repozytorium GitHub)"]
+        CICD["PIPELINE CI/CD (GitHub Actions)<br/>Gitleaks, Semgrep, pip-audit, pytest<br/>Docker + Trivy, OWASP ZAP<br/>BRAMKA: poważne findings blokują merge do main<br/>vulnerable: czerwony, main: zielony"]
+
+        subgraph INET["Internet (strefa niezaufana)"]
+            U["Użytkownik<br/>własne zgłoszenia, komentarze"]
+            T["Technik<br/>wszystkie zgłoszenia, status"]
+        end
+
+        subgraph DOCKER["Kontener Docker: aplikacja Flask"]
+            F["Flask: routing, sesja, walidacja wejścia"]
+            AUTH["Auth<br/>rejestracja, logowanie, limit prób"]
+            TIK["Zgłoszenia i komentarze<br/>CRUD, wyszukiwanie, status"]
+            LOG["Logi<br/>zdarzenia bezpieczeństwa"]
+            AC["Kontrola dostępu:<br/>właściciel zasobu lub rola Technik (403/404)"]
+            F --> AUTH & TIK & LOG
+            AUTH & TIK --> AC
+        end
+
+        subgraph DATA["Strefa danych"]
+            LOGF[("app.log")]
+            DB[("SQLite<br/>users, tickets, comments")]
+        end
+
+        DEVN -->|"push / PR"| CICD
+        CICD -->|"build i testy w kontenerze"| F
+        U & T -->|"HTTPS (docelowo)"| F
+        LOG -->|zapis| LOGF
+        AC -->|"zapytania parametryzowane"| DB
+    end
+
+    classDef dev fill:#eef3ff,stroke:#33415c,color:#1a1a2e;
+    classDef pipe fill:#fff4e5,stroke:#e08a00,color:#1a1a2e;
+    classDef ext fill:#fdecec,stroke:#c0392b,color:#1a1a2e;
+    classDef app fill:#eef3ff,stroke:#33415c,color:#1a1a2e;
+    classDef accessctl fill:#fff4e5,stroke:#e08a00,color:#1a1a2e;
+    classDef data fill:#eaf7ee,stroke:#2e8b57,color:#1a1a2e;
+    class DEVN dev;
+    class CICD pipe;
+    class U,T ext;
+    class F,AUTH,TIK,LOG app;
+    class AC accessctl;
+    class LOGF,DB data;
+
+    style ALL fill:#ffffff,stroke:#999999,color:#1a1a2e
+    style INET fill:#fff5f5,stroke:#c0392b,color:#1a1a2e
+    style DOCKER fill:#fffaf0,stroke:#d17a00,color:#1a1a2e
+    style DATA fill:#f5fbf7,stroke:#2e8b57,color:#1a1a2e
