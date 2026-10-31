@@ -16,12 +16,20 @@ RUN groupadd -g 10001 secticket \
     && chown secticket:secticket /app/data
 
 COPY --chown=secticket:secticket app/ ./app/
+COPY --chown=secticket:secticket migrations/ ./migrations/
+COPY --chown=secticket:secticket \
+    docker/entrypoint.sh /usr/local/bin/secticket-entrypoint
+
+RUN chmod 755 /usr/local/bin/secticket-entrypoint
 
 USER secticket
 
 EXPOSE 5000
 
+ENTRYPOINT ["/usr/local/bin/secticket-entrypoint"]
+
 CMD ["gunicorn", "--workers", "2", \
      "--bind", "0.0.0.0:5000", \
      "--access-logfile", "-", \
+     "--error-logfile", "-", \
      "app:create_app()"]

@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 cd "$(dirname "$0")"
 
 if [ ! -f .env ]; then
-    echo "[SecTicket] Tworzenie konfiguracji .env..."
+    echo "[SecTicket] Generowanie konfiguracji..."
 
     umask 077
 
@@ -15,11 +14,15 @@ if [ ! -f .env ]; then
     printf 'COOKIE_SECURE=false\n' >> .env
 fi
 
-echo "[SecTicket] Budowanie i uruchamianie..."
+echo "[SecTicket] Budowanie i uruchamianie kontenera..."
 
-docker compose up -d --build
+if ! docker compose up --build --wait --wait-timeout 120; then
+    echo "[SecTicket] BLAD uruchamiania!"
+    docker compose logs --tail=80 app
+    exit 1
+fi
 
 echo ""
-echo "[SecTicket] Kontenery uruchomione."
-echo "Aplikacja: http://localhost:5000"
-echo "Health:    http://localhost:5000/health"
+echo "[SecTicket] Aplikacja gotowa!"
+echo "Panel:  http://localhost:5000"
+echo "Health: http://localhost:5000/health"
