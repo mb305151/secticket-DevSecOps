@@ -2,6 +2,7 @@
 
 {% block content %}
 <section class="ticket-panel">
+
     <p>
         <a href="{{ url_for('tickets.list_tickets') }}">
             Powrot do zgloszen
@@ -19,9 +20,48 @@
     </div>
 
     <h2>Opis usterki</h2>
+
     <div class="ticket-description">
         {{ ticket.description }}
     </div>
+
+    {% if current_user.role == "technician" %}
+    <div class="ticket-section">
+        <h2>Obsluga techniczna</h2>
+
+        <form method="post"
+              action="{{ url_for(
+                'tickets.change_status',
+                ticket_id=ticket.id
+              ) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <label for="status">Status zgloszenia</label>
+
+            <select id="status" name="status">
+                {% for value, label in [
+                    ('open', 'Otwarte'),
+                    ('in_progress', 'W trakcie'),
+                    ('closed', 'Zamkniete')
+                ] %}
+                <option value="{{ value }}"
+                    {% if ticket.status == value %}
+                        selected
+                    {% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button class="primary" type="submit">
+                Zmien status
+            </button>
+        </form>
+    </div>
+    {% endif %}
 
     {% if ticket.user_id == current_user.id %}
     <div class="ticket-actions">
@@ -41,6 +81,7 @@
               onsubmit="return confirm(
                 'Czy na pewno usunac zgloszenie?'
               )">
+
             <input type="hidden"
                    name="csrf_token"
                    value="{{ csrf_token() }}">
@@ -51,5 +92,53 @@
         </form>
     </div>
     {% endif %}
+
+    <div class="ticket-section">
+        <h2>Komentarze</h2>
+
+        {% if comments %}
+            <div class="comments-list">
+                {% for comment in comments %}
+                <article class="comment">
+                    <div class="comment-header">
+                        <strong>{{ comment.author.username }}</strong>
+                        <span>{{ comment.created_at }}</span>
+                    </div>
+
+                    <div class="comment-content">
+                        {{ comment.content }}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Brak komentarzy.</p>
+        {% endif %}
+
+        <h3>Dodaj komentarz</h3>
+
+        <form method="post"
+              action="{{ url_for(
+                  'tickets.add_comment',
+                  ticket_id=ticket.id
+              ) }}">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <label for="content">Tresc komentarza</label>
+
+            <textarea id="content"
+                      name="content"
+                      maxlength="2000"
+                      rows="4"
+                      required></textarea>
+
+            <button class="primary" type="submit">
+                Dodaj komentarz
+            </button>
+        </form>
+    </div>
 </section>
 {% endblock %}

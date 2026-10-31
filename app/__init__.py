@@ -83,6 +83,9 @@ def create_app():
     from .tickets import tickets_bp
     app.register_blueprint(tickets_bp)
 
+    from .cli import register_cli
+    register_cli(app)
+
     @app.get("/")
     def index():
         return render_template("index.html")

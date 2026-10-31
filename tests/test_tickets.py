@@ -3,7 +3,7 @@ import re
 from sqlalchemy import select
 
 from app.extensions import db
-from app.models import Ticket, User
+from app.models import Ticket, User, Comment
 from app.security import hash_password
 
 
@@ -228,3 +228,191 @@ def test_ticket_content_is_escaped(client, app):
     assert response.status_code == 200
     assert b"&lt;script&gt;" in response.data
     assert b"<script>alert(1)</script>" not in response.data
+
+
+def test_owner_can_comment_and_xss_is_escaped(client, app):
+    ticket_id, _ = seed(app)
+    login(client, "alice")
+
+    token = csrf(client, f"/tickets/{ticket_id}")
+
+    response = client.post(
+        f"/tickets/{ticket_id}/comments",
+        data={
+            "content": "<script>alert(1)</script>",
+            "csrf_token": token,
+        },
+    )
+
+    assert response.status_code == 303
+
+    page = client.get(f"/tickets/{ticket_id}")
+
+    assert page.status_code == 200
+    assert b"&lt;script&gt;" in page.data
+    assert b"<script>alert(1)</script>" not in page.data
+
+
+def test_idor_blocks_foreign_comments(client, app):
+    ticket_id, _ = seed(app)
+    login(client, "bob")
+
+    token = csrf(client, "/tickets/new")
+
+    response = client.post(
+        f"/tickets/{ticket_id}/comments",
+        data={
+            "content": "Nieautoryzowany komentarz",
+            "csrf_token": token,
+        },
+    )
+
+    assert response.status_code == 404
+
+    with app.app_context():
+        comments = db.session.scalars(
+            select(Comment).where(
+                Comment.ticket_id == ticket_id
+            )
+        ).all()
+
+        assert comments == []
+
+
+def test_technician_can_change_status_and_comment(client, app):
+    ticket_id, _ = seed(app)
+
+    with app.app_context():
+        db.session.add(User(
+            username="technik",
+            email="technik@example.com",
+            password_hash=hash_password(PASSWORD),
+            role="user",
+        ))
+        db.session.commit()
+
+    result = app.test_cli_runner().invoke(
+        args=["grant-technician", "technik"]
+    )
+    assert result.exit_code == 0, result.output
+
+    login(client, "technik")
+
+    page = client.get(f"/tickets/{ticket_id}")
+    assert page.status_code == 200
+
+    token = csrf(client, f"/tickets/{ticket_id}")
+
+    status_response = client.post(
+        f"/tickets/{ticket_id}/status",
+        data={
+            "status": "in_progress",
+            "csrf_token": token,
+        },
+    )
+
+    assert status_response.status_code == 303
+
+    comment_response = client.post(
+        f"/tickets/{ticket_id}/comments",
+        data={
+            "content": "Technik rozpoczal naprawe.",
+            "csrf_token": token,
+        },
+    )
+
+    assert comment_response.status_code == 303
+
+    with app.app_context():
+        ticket = db.session.get(Ticket, ticket_id)
+
+        assert ticket.status == "in_progress"
+
+        comment = db.session.scalar(
+            select(Comment).where(
+                Comment.ticket_id == ticket_id
+            )
+        )
+
+        assert comment is not None
+        assert comment.author.username == "technik"
+
+
+def test_user_cannot_change_status(client, app):
+    ticket_id, _ = seed(app)
+    login(client, "alice")
+
+    token = csrf(client, f"/tickets/{ticket_id}")
+
+    response = client.post(
+        f"/tickets/{ticket_id}/status",
+        data={
+            "status": "closed",
+            "csrf_token": token,
+        },
+    )
+
+    assert response.status_code == 403
+
+    with app.app_context():
+        ticket = db.session.get(Ticket, ticket_id)
+        assert ticket.status == "open"
+
+
+def test_technician_cannot_edit_foreign_ticket(client, app):
+    ticket_id, _ = seed(app)
+
+    with app.app_context():
+        db.session.add(User(
+            username="technik",
+            email="technik@example.com",
+            password_hash=hash_password(PASSWORD),
+            role="technician",
+        ))
+        db.session.commit()
+
+    login(client, "technik")
+
+    assert client.get(
+        f"/tickets/{ticket_id}/edit"
+    ).status_code == 404
+
+    token = csrf(client, f"/tickets/{ticket_id}")
+
+    response = client.post(
+        f"/tickets/{ticket_id}/edit",
+        data={
+            "title": "Nieautoryzowana edycja",
+            "description": "Zmiana cudzego zgloszenia.",
+            "priority": "low",
+            "csrf_token": token,
+        },
+    )
+
+    assert response.status_code == 404
+
+
+def test_invalid_comment_is_not_saved(client, app):
+    ticket_id, _ = seed(app)
+    login(client, "alice")
+
+    token = csrf(client, f"/tickets/{ticket_id}")
+
+    response = client.post(
+        f"/tickets/{ticket_id}/comments",
+        data={
+            "content": "   ",
+            "csrf_token": token,
+        },
+    )
+
+    assert response.status_code == 303
+
+    with app.app_context():
+        comments = db.session.scalars(
+            select(Comment).where(
+                Comment.ticket_id == ticket_id
+            )
+        ).all()
+
+        assert comments == []

@@ -1,5 +1,6 @@
 from flask import (
     Blueprint,
+    abort,
     flash,
     redirect,
     render_template,
@@ -10,7 +11,7 @@ from flask_login import current_user, login_required
 from sqlalchemy import select
 
 from .extensions import db
-from .models import Ticket
+from .models import Ticket, Comment
 
 
 tickets_bp = Blueprint(
@@ -149,9 +150,16 @@ def create():
 def detail(ticket_id):
     ticket = get_ticket(ticket_id)
 
+    comments = db.session.scalars(
+        select(Comment)
+        .where(Comment.ticket_id == ticket.id)
+        .order_by(Comment.created_at, Comment.id)
+    ).all()
+
     return render_template(
         "tickets/detail.html",
         ticket=ticket,
+        comments=comments,
     )
 
 
@@ -204,5 +212,65 @@ def delete(ticket_id):
 
     return redirect(
         url_for("tickets.list_tickets"),
+        code=303,
+    )
+
+
+@tickets_bp.post("/<int:ticket_id>/comments")
+@login_required
+def add_comment(ticket_id):
+    ticket = get_ticket(ticket_id)
+
+    content = request.form.get("content", "").strip()
+
+    if not 1 <= len(content) <= 2000:
+        flash(
+            "Komentarz musi miec od 1 do 2000 znakow.",
+            "error",
+        )
+        return redirect(
+            url_for("tickets.detail", ticket_id=ticket.id),
+            code=303,
+        )
+
+    comment = Comment(
+        ticket_id=ticket.id,
+        user_id=current_user.id,
+        content=content,
+    )
+
+    db.session.add(comment)
+    db.session.commit()
+
+    flash("Komentarz zostal dodany.", "success")
+
+    return redirect(
+        url_for("tickets.detail", ticket_id=ticket.id),
+        code=303,
+    )
+
+
+@tickets_bp.post("/<int:ticket_id>/status")
+@login_required
+def change_status(ticket_id):
+    if current_user.role != "technician":
+        abort(403)
+
+    ticket = get_ticket(ticket_id)
+
+    new_status = request.form.get("status", "")
+
+    if new_status not in {
+        "open", "in_progress", "closed"
+    }:
+        abort(400)
+
+    ticket.status = new_status
+    db.session.commit()
+
+    flash("Status zgloszenia zmieniony.", "success")
+
+    return redirect(
+        url_for("tickets.detail", ticket_id=ticket.id),
         code=303,
     )
