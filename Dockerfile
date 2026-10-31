@@ -1,4 +1,4 @@
-FROM python:3.13-slim-trixie
+FROM python:3.13-slim-trixie AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -33,3 +33,21 @@ CMD ["gunicorn", "--workers", "2", \
      "--access-logfile", "-", \
      "--error-logfile", "-", \
      "app:create_app()"]
+
+
+# Test environment - not included in production image
+FROM runtime AS test
+
+USER root
+
+COPY requirements-dev.txt ./requirements-dev.txt
+
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+COPY --chown=secticket:secticket tests/ ./tests/
+
+USER secticket
+
+ENTRYPOINT []
+
+CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests"]
