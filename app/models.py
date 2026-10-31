@@ -208,3 +208,25 @@ class RateLimitBucket(db.Model):
             name="ck_rate_limit_attempts"
         ),
     )
+
+
+class SecurityEvent(db.Model):
+    __tablename__ = "security_events"
+
+    id = db.Column(db.Integer, primary_key=True)
+    event_type = db.Column(
+        db.String(50), nullable=False, index=True
+    )
+    created_at = db.Column(
+        db.Integer, nullable=False, index=True
+    )
+
+    actor_user_id = db.Column(db.Integer)
+    target_user_id = db.Column(db.Integer)
+    ticket_id = db.Column(db.Integer)
+
+    ip_hash = db.Column(db.String(64))
+    identity_hash = db.Column(db.String(64))
+
+    old_status = db.Column(db.String(20))
+    new_status = db.Column(db.String(20))

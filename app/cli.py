@@ -4,6 +4,7 @@ from sqlalchemy import select
 
 from .extensions import db
 from .models import User
+from .audit import add_event
 from .security import hash_password
 
 
@@ -33,6 +34,12 @@ def register_cli(app):
                 return
 
             user.role = "technician"
+
+            add_event(
+                "account.role_granted",
+                target_user_id=user.id,
+            )
+
             db.session.commit()
 
             click.echo(
@@ -66,6 +73,11 @@ def register_cli(app):
                 user.password_hash = hash_password(new_password)
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
+
+            add_event(
+                "account.password_reset",
+                target_user_id=user.id,
+            )
 
             db.session.commit()
             click.echo("Haslo zostalo zmienione.")

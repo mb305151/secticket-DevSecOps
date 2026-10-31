@@ -12,6 +12,7 @@ from sqlalchemy import select
 
 from .extensions import db
 from .models import Ticket, Comment
+from .audit import add_event
 
 
 tickets_bp = Blueprint(
@@ -265,7 +266,17 @@ def change_status(ticket_id):
     }:
         abort(400)
 
+    old_status = ticket.status
     ticket.status = new_status
+
+    add_event(
+        "ticket.status_changed",
+        actor_user_id=current_user.id,
+        ticket_id=ticket.id,
+        old_status=old_status,
+        new_status=new_status,
+    )
+
     db.session.commit()
 
     flash("Status zgloszenia zmieniony.", "success")

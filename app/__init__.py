@@ -86,6 +86,9 @@ def create_app():
     from .cli import register_cli
     register_cli(app)
 
+    from .audit import register_audit_logging
+    register_audit_logging(app)
+
     @app.get("/")
     def index():
         return render_template("index.html")
