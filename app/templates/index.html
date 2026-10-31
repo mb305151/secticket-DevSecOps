@@ -1,16 +1,21 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1">
-    <title>SecTicket</title>
-</head>
-<body>
-    <main>
-        <h1>SecTicket</h1>
-        <p>System zarządzania zgłoszeniami usterek.</p>
-        <p>Środowisko aplikacji zostało uruchomione.</p>
-    </main>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h1>SecTicket</h1>
+
+    <p>
+        System zarzadzania zgloszeniami usterek.
+    </p>
+
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}">
+            Przejdz do panelu
+        </a>
+    {% else %}
+        <a href="{{ url_for('auth.register') }}">
+            Utworz konto
+        </a>
+    {% endif %}
+</section>
+{% endblock %}

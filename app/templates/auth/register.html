@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h1>Utworz konto</h1>
+    <p>Zarejestruj sie w systemie SecTicket.</p>
+
+    <form method="post">
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <label for="username">Login</label>
+        <input id="username" name="username"
+               type="text" required minlength="3"
+               maxlength="30" autocomplete="username">
+
+        <label for="email">E-mail</label>
+        <input id="email" name="email"
+               type="email" required maxlength="254"
+               autocomplete="email">
+
+        <label for="password">Haslo</label>
+        <input id="password" name="password"
+               type="password" required minlength="12"
+               maxlength="128" autocomplete="new-password">
+
+        <label for="confirm_password">
+            Powtorz haslo
+        </label>
+        <input id="confirm_password"
+               name="confirm_password"
+               type="password" required
+               autocomplete="new-password">
+
+        <button type="submit" class="primary">
+            Zarejestruj
+        </button>
+    </form>
+
+    <p>
+        Masz konto?
+        <a href="{{ url_for('auth.login') }}">
+            Zaloguj sie
+        </a>
+    </p>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h1>Panel SecTicket</h1>
+
+    <p>
+        Zalogowano jako:
+        <strong>{{ user.username }}</strong>
+    </p>
+
+    <p>Rola: {{ user.role }}</p>
+
+    <p>
+        Logowanie i sesje dzialaja prawidlowo.
+    </p>
+
+    <p>
+        Modul zgloszen dodamy w kolejnym etapie.
+    </p>
+</section>
+{% endblock %}

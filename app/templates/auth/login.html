@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h1>Logowanie</h1>
+    <p>Zaloguj sie do SecTicket.</p>
+
+    <form method="post">
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <label for="identifier">Login lub e-mail</label>
+        <input id="identifier" name="identifier"
+               type="text" required
+               autocomplete="username">
+
+        <label for="password">Haslo</label>
+        <input id="password" name="password"
+               type="password" required
+               autocomplete="current-password">
+
+        <button type="submit" class="primary">
+            Zaloguj
+        </button>
+    </form>
+
+    <p>
+        Nie masz konta?
+        <a href="{{ url_for('auth.register') }}">
+            Zarejestruj sie
+        </a>
+    </p>
+</section>
+{% endblock %}
