@@ -46,6 +46,7 @@ def create_app():
         SECRET_KEY=secret_key,
         SQLALCHEMY_DATABASE_URI=f"sqlite:///{database_path}",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        MAX_CONTENT_LENGTH=1048576,
         SQLALCHEMY_ENGINE_OPTIONS={
             "connect_args": {"timeout": 10}
         },
@@ -78,6 +79,9 @@ def create_app():
 
     from .auth import auth_bp
     app.register_blueprint(auth_bp)
+
+    from .tickets import tickets_bp
+    app.register_blueprint(tickets_bp)
 
     @app.get("/")
     def index():

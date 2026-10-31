@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="ticket-panel">
+    <div class="ticket-header">
+        <div>
+            <h1>Zgloszenia</h1>
+            <p>
+                {% if current_user.role == "technician" %}
+                    Wszystkie zgloszenia w systemie.
+                {% else %}
+                    Zarzadzaj swoimi zgloszeniami.
+                {% endif %}
+            </p>
+        </div>
+
+        <a class="action-link"
+           href="{{ url_for('tickets.create') }}">
+            + Nowe zgloszenie
+        </a>
+    </div>
+
+    <form method="get"
+          action="{{ url_for('tickets.list_tickets') }}"
+          class="ticket-search">
+        <input type="search" name="q"
+               value="{{ query }}"
+               maxlength="100"
+               placeholder="Szukaj po tytule...">
+        <button type="submit">Szukaj</button>
+    </form>
+
+    {% if tickets.items %}
+        <div class="ticket-table-wrap">
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tytul</th>
+                        <th>Priorytet</th>
+                        <th>Status</th>
+                        <th>Akcja</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets.items %}
+                    <tr>
+                        <td>#{{ ticket.id }}</td>
+                        <td>{{ ticket.title }}</td>
+                        <td>{{ ticket.priority }}</td>
+                        <td>{{ ticket.status }}</td>
+                        <td>
+                            <a href="{{ url_for(
+                                'tickets.detail',
+                                ticket_id=ticket.id
+                            ) }}">Szczegoly</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Nie znaleziono zgloszen.</p>
+    {% endif %}
+
+    <div class="ticket-pagination">
+        {% if tickets.has_prev %}
+            <a href="{{ url_for(
+                'tickets.list_tickets',
+                page=tickets.prev_num,
+                q=query
+            ) }}">Poprzednia</a>
+        {% endif %}
+
+        <span>
+            Strona {{ tickets.page }}
+            z {{ tickets.pages if tickets.pages else 1 }}
+        </span>
+
+        {% if tickets.has_next %}
+            <a href="{{ url_for(
+                'tickets.list_tickets',
+                page=tickets.next_num,
+                q=query
+            ) }}">Nastepna</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

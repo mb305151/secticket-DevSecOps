@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="ticket-panel">
+    <p>
+        <a href="{{ url_for('tickets.list_tickets') }}">
+            Powrot do zgloszen
+        </a>
+    </p>
+
+    <h1>{{ ticket.title }}</h1>
+
+    <div class="ticket-metadata">
+        <p><strong>ID:</strong> #{{ ticket.id }}</p>
+        <p><strong>Autor:</strong> {{ ticket.owner.username }}</p>
+        <p><strong>Priorytet:</strong> {{ ticket.priority }}</p>
+        <p><strong>Status:</strong> {{ ticket.status }}</p>
+        <p><strong>Utworzono:</strong> {{ ticket.created_at }}</p>
+    </div>
+
+    <h2>Opis usterki</h2>
+    <div class="ticket-description">
+        {{ ticket.description }}
+    </div>
+
+    {% if ticket.user_id == current_user.id %}
+    <div class="ticket-actions">
+        <a class="action-link"
+           href="{{ url_for(
+               'tickets.edit',
+               ticket_id=ticket.id
+           ) }}">
+            Edytuj
+        </a>
+
+        <form method="post"
+              action="{{ url_for(
+                  'tickets.delete',
+                  ticket_id=ticket.id
+              ) }}"
+              onsubmit="return confirm(
+                'Czy na pewno usunac zgloszenie?'
+              )">
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <button type="submit" class="delete-button">
+                Usun zgloszenie
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

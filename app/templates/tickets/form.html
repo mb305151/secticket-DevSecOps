@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h1>{{ heading }}</h1>
+
+    <form method="post" action="{{ action }}">
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <label for="title">Tytul</label>
+        <input id="title"
+               name="title"
+               type="text"
+               value="{{ values.title }}"
+               minlength="3"
+               maxlength="200"
+               required>
+
+        <label for="description">Opis usterki</label>
+        <textarea id="description"
+                  name="description"
+                  minlength="10"
+                  maxlength="5000"
+                  rows="7"
+                  required>{{ values.description }}</textarea>
+
+        <label for="priority">Priorytet</label>
+        <select id="priority" name="priority">
+            {% for value, label in [
+                ('low', 'Niski'),
+                ('medium', 'Sredni'),
+                ('high', 'Wysoki')
+            ] %}
+            <option value="{{ value }}"
+                {% if values.priority == value %}
+                    selected
+                {% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="primary">
+            Zapisz zgloszenie
+        </button>
+    </form>
+
+    <p>
+        <a href="{{ url_for('tickets.list_tickets') }}">
+            Powrot do listy
+        </a>
+    </p>
+</section>
+{% endblock %}

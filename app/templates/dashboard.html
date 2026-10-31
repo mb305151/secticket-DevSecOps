@@ -11,12 +11,15 @@
 
     <p>Rola: {{ user.role }}</p>
 
-    <p>
-        Logowanie i sesje dzialaja prawidlowo.
-    </p>
+    <h2>Zarzadzanie zgloszeniami</h2>
+
+    <p>Przegladaj i obsluguj zgloszenia usterek.</p>
 
     <p>
-        Modul zgloszen dodamy w kolejnym etapie.
+        <a class="action-link"
+           href="{{ url_for('tickets.list_tickets') }}">
+            Przejdz do zgloszen
+        </a>
     </p>
 </section>
 {% endblock %}
