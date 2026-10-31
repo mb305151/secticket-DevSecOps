@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+instance/
+
+# Node / Tailwind
+node_modules/
+
+# Editor
+.vscode/
+.idea/
+
+# System
+.DS_Store

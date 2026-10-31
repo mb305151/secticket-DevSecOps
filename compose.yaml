@@ -1,0 +1,37 @@
+name: secticket
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: secticket:local
+
+    ports:
+      - "5000:5000"
+
+    env_file:
+      - .env
+
+    environment:
+      DATABASE_PATH: /app/data/secticket.db
+
+    volumes:
+      - secticket_data:/app/data
+
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=2)"
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  secticket_data:
