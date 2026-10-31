@@ -4,6 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 echo "[SecTicket] Budowanie obrazu testowego..."
+
 docker build --target test -t secticket:test .
 
 echo "[SecTicket] Uruchamianie testow..."
@@ -17,4 +18,4 @@ docker run \
   --security-opt no-new-privileges \
   secticket:test
 
-echo "[SecTicket] Testy zakonczone pomyslnie."
+echo "[SecTicket] Wszystkie testy zaliczone!"
