@@ -1,4 +1,4 @@
-FROM python:3.13-slim-trixie AS runtime
+FROM python:3.13-slim-trixie AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -35,8 +35,16 @@ CMD ["gunicorn", "--workers", "2", \
      "app:create_app()"]
 
 
+# Production runtime without pip and its vendored libraries
+FROM base AS runtime
+
+USER root
+RUN python -m pip uninstall --yes pip
+USER secticket
+
+
 # Test environment - not included in production image
-FROM runtime AS test
+FROM base AS test
 
 USER root
 
