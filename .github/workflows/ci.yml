@@ -35,6 +35,7 @@ jobs:
             --cap-drop ALL \
             --security-opt no-new-privileges \
             -e DATABASE_PATH=/tmp/ci-schema.db \
+            -e SECRET_KEY=ci-only-dummy-secret-not-for-production \
             --entrypoint sh secticket:ci -s <<'SH'
           set -eu
 
