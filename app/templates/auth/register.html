@@ -22,8 +22,18 @@
 
         <label for="password">Haslo</label>
         <input id="password" name="password"
-               type="password" required minlength="12"
-               maxlength="128" autocomplete="new-password">
+               type="password" required
+               minlength="12" maxlength="128"
+               autocomplete="new-password"
+               aria-describedby="password-rules">
+
+        <ul id="password-rules" class="password-rules">
+            <li data-rule="length">12-128 znakow</li>
+            <li data-rule="lower">Mala litera</li>
+            <li data-rule="upper">Wielka litera</li>
+            <li data-rule="digit">Cyfra</li>
+            <li data-rule="special">Znak specjalny</li>
+        </ul>
 
         <label for="confirm_password">
             Powtorz haslo
@@ -32,6 +42,8 @@
                name="confirm_password"
                type="password" required
                autocomplete="new-password">
+
+        <p id="password-match" aria-live="polite"></p>
 
         <button type="submit" class="primary">
             Zarejestruj
@@ -45,4 +57,7 @@
         </a>
     </p>
 </section>
+
+<script src="{{ url_for('static', filename='password.js') }}"
+        defer></script>
 {% endblock %}

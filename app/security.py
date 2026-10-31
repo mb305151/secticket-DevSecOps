@@ -1,3 +1,5 @@
+import unicodedata
+
 from argon2 import PasswordHasher
 from argon2.exceptions import (
     InvalidHashError,
@@ -12,10 +14,30 @@ password_hasher = PasswordHasher(
 )
 
 
+def password_checks(password):
+    categories = [
+        unicodedata.category(char)
+        for char in password
+    ]
+
+    return {
+        "length": 12 <= len(password) <= 128,
+        "lower": "Ll" in categories,
+        "upper": "Lu" in categories,
+        "digit": "Nd" in categories,
+        "special": any(
+            category.startswith(("P", "S"))
+            for category in categories
+        ),
+    }
+
+
 def hash_password(password):
-    if not 12 <= len(password) <= 128:
+    checks = password_checks(password)
+
+    if not all(checks.values()):
         raise ValueError(
-            "Haslo musi miec od 12 do 128 znakow."
+            "Haslo nie spelnia wymagan bezpieczenstwa."
         )
 
     return password_hasher.hash(password)
@@ -32,3 +54,10 @@ def verify_password(stored_hash, password):
         InvalidHashError,
     ):
         return False
+
+
+# Hash pomocniczy dla prob logowania na nieistniejace konto.
+# Nie jest przypisany do zadnego uzytkownika.
+DUMMY_PASSWORD_HASH = password_hasher.hash(
+    "SecTicket-Dummy-Password-2026!"
+)

@@ -100,3 +100,79 @@ button.primary {
 .alert.success {
     background: #dcfce7;
 }
+
+/* Dynamiczna walidacja formularza */
+
+.field-feedback {
+    min-height: 22px;
+    margin: 6px 0 2px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}
+
+.field-feedback.is-checking {
+    color: #64748b;
+}
+
+.field-feedback.is-available {
+    color: #15803d;
+}
+
+.field-feedback.is-taken,
+.field-feedback.is-invalid {
+    color: #dc2626;
+}
+
+input[aria-invalid="true"] {
+    border-color: #ef4444;
+    background-color: #fffafa;
+}
+
+input:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 1px;
+}
+
+/* Password requirements */
+
+.password-rules {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0 20px;
+    display: grid;
+    gap: 7px;
+}
+
+.password-rules li {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.password-rules li::before {
+    content: "○";
+    display: inline-block;
+    width: 22px;
+}
+
+.password-rules li.valid {
+    color: #15803d;
+}
+
+.password-rules li.valid::before {
+    content: "✓";
+}
+
+.password-rules li.invalid {
+    color: #64748b;
+}
+
+.match-success {
+    color: #15803d;
+    font-size: 13px;
+}
+
+.match-error {
+    color: #dc2626;
+    font-size: 13px;
+}

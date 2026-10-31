@@ -177,3 +177,34 @@ class Comment(db.Model):
         "User",
         back_populates="comments"
     )
+
+
+class RateLimitBucket(db.Model):
+    __tablename__ = "rate_limit_buckets"
+
+    scope = db.Column(
+        db.String(32),
+        primary_key=True
+    )
+
+    identifier = db.Column(
+        db.String(64),
+        primary_key=True
+    )
+
+    attempts = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    reset_at = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "attempts >= 1",
+            name="ck_rate_limit_attempts"
+        ),
+    )
