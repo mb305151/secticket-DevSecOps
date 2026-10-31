@@ -1,0 +1,94 @@
+name: SecTicket DevSecOps CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Testy i migracje SQLite
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Pobierz kod repozytorium
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Uruchom testy pytest
+        run: ./test.sh
+
+      - name: Zbuduj obraz produkcyjny
+        run: docker build --target runtime -t secticket:ci .
+
+      - name: Sprawdz migracje na pustej bazie SQLite
+        run: |
+          docker run --rm -i \
+            --network none \
+            --read-only \
+            --tmpfs /tmp:rw,nosuid,nodev,size=64m,mode=1777 \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            -e DATABASE_PATH=/tmp/ci-schema.db \
+            --entrypoint sh secticket:ci -s <<'SH'
+          set -eu
+
+          flask --app 'app:create_app()' db upgrade
+
+          python - <<'PY'
+          from sqlalchemy import inspect
+          from app import create_app
+          from app.extensions import db
+
+          app = create_app()
+
+          with app.app_context():
+              tables = set(inspect(db.engine).get_table_names())
+
+              expected = {
+                  "users",
+                  "tickets",
+                  "comments",
+                  "rate_limit_buckets",
+                  "security_events",
+              }
+
+              missing = expected - tables
+              assert not missing, f"Brak tabel: {missing}"
+
+              print("[OK] Migracje SQLite zaliczone")
+          PY
+          SH
+
+  security:
+    name: SAST i audyt zaleznosci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Pobierz kod repozytorium
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Przygotuj Python 3.13
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Zainstaluj narzedzia skanujace
+        run: |
+          python -m pip install \
+            "bandit==1.9.4" \
+            "pip-audit==2.10.1"
+
+      - name: SAST - Bandit
+        run: bandit -r app -ll -ii
+
+      - name: SCA - pip-audit
+        run: python -m pip_audit -r requirements.txt
