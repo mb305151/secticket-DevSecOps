@@ -33,6 +33,29 @@ Podział obszarów odpowiada założeniom projektu. Faktyczne autorstwo zmian mo
 
 Nie trzeba lokalnie instalować Pythona, Flaska, SQLite ani Node.js — zależności aplikacji i budowanie stylów realizowane są w Dockerze.
 
+### Docker na swiezym Ubuntu
+
+Docker jest **wymaganiem srodowiskowym**, a nie biblioteka instalowana przez aplikacje.
+Na Ubuntu, ktore nie ma jeszcze Dockera (przykladowa instalacja z repozytorium Ubuntu):
+
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose-v2
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+```
+
+Po dodaniu do grupy `docker` **wyloguj sie i zaloguj ponownie** (w VMware
+moze byc potrzebny restart VM). Sprawdz `docker info` oraz `docker compose version`.
+Czlonkostwo w grupie `docker` daje praktycznie uprawnienia administratora systemu,
+dlatego nalezy nadawac je tylko zaufanym uzytkownikom.
+Nie mieszaj pakietow Ubuntu z pakietami `docker-ce` z oficjalnego repozytorium Docker;
+jesli Docker jest juz zainstalowany, nie wykonuj ponownej instalacji.
+
+`./start.sh` i `./test.sh` na poczatku sprawdzaja obecność Dockera,
+dostep do uslugi oraz (dla startu) Docker Compose.
+Szczegoly instalacji: https://docs.docker.com/engine/install/ubuntu/.
+
 ## Instalacja i uruchomienie — jedna komenda
 
 Pobierz aktualną gałąź projektu:
