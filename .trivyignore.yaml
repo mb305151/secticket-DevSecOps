@@ -1,0 +1,39 @@
+# SecTicket DevSecOps - temporary risk exceptions
+# Applies to the demonstration Docker image only.
+# Owner: SecTicket team
+# Review: 2026-11-08
+# Expiration: 2026-11-30
+# Full, unfiltered results remain visible in CI.
+
+vulnerabilities:
+  - id: CVE-2026-76642
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; privileged mount helper path not used by Flask. Reassessment pending."
+
+  - id: CVE-2026-78408
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; privileged nsenter cgroup operations not part of application workflow."
+
+  - id: CVE-2026-78409
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; conflicting affected-version assessments require further review."
+
+  - id: CVE-2026-78410
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; restricted privileged mounts not required by SecTicket."
+
+  - id: CVE-2026-54369
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; privileged ACL pathname operations not exposed by application routes."
+
+  - id: CVE-2025-69720
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; vulnerable infocmp CLI functionality not exposed by Flask."
+
+  - id: CVE-2026-16742
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; systemd-homed not intended to run in this container."
+
+  - id: CVE-2026-9538
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception; application does not process untrusted TAR archives through Perl."

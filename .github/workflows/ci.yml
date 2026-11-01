@@ -109,7 +109,22 @@ jobs:
       - name: Zbuduj obraz produkcyjny
         run: docker build --target runtime -t secticket:scan .
 
-      - name: Skan podatnosci obrazu Docker
+      - name: Trivy - pelny raport podatnosci
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: secticket:scan
+          version: 'v0.74.0'
+          format: table
+          scanners: vuln
+          vuln-type: os,library
+          severity: 'HIGH,CRITICAL'
+          exit-code: '0'
+          ignore-unfixed: 'false'
+          trivyignores: .github/trivy/no-exceptions
+          cache: 'false'
+
+      - name: Trivy - blokuj niezaakceptowane HIGH i CRITICAL
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
@@ -121,4 +136,6 @@ jobs:
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
           ignore-unfixed: 'false'
+          trivyignores: .trivyignore.yaml
+          skip-setup-trivy: 'true'
           cache: 'false'

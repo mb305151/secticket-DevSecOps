@@ -6,7 +6,7 @@
 **Gałąź:** `feat/etap2-bootstrap`  
 **Obraz:** `secticket:scan`, budowany z `python:3.13-slim-trixie`  
 **Narzędzie:** Trivy 0.74.0, skan podatności OS i bibliotek, filtr `HIGH,CRITICAL`  
-**Status dokumentu:** **Wstępna analiza techniczna — ryzyko nie zostało jeszcze formalnie zaakceptowane.**
+**Status dokumentu:** **Analiza techniczna z czasowym wyjątkiem CI dla wersji demonstracyjnej, do 2026-11-30.**
 
 > **Uwaga:** ten dokument opisuje wyniki z konkretnego przebiegu CI. Nie jest certyfikatem bezpieczeństwa ani dowodem, że pozostałe podatności są niewykorzystywalne. Statusy CVE, poprawki i warunki wdrożenia należy okresowo weryfikować.
 
@@ -37,7 +37,7 @@ SecTicket to aplikacja Flask uruchamiana przez Gunicorn w kontenerze Docker, z b
 
 ## 3. Rejestr ryzyka — analiza poszczególnych CVE
 
-W tabeli **HIGH** oznacza klasyfikację Trivy, a nie potwierdzone wysokie ryzyko wykorzystania przeciwko SecTicket. „Otwarta” oznacza, że **ryzyka jeszcze nie zaakceptowano**.
+W tabeli **HIGH** oznacza klasyfikację Trivy, a nie potwierdzone wysokie ryzyko wykorzystania przeciwko SecTicket. „Otwarta” oznacza, że **szczegółowa weryfikacja techniczna pozostaje niezakończona**. Czasowy wyjątek CI nie zamyka oceny.
 
 | ID | Pakiet źródłowy / przykład | Mechanizm i warunek wykorzystania | Wstępna ocena w SecTicket | Decyzja / następny krok | Status |
 | --- | --- | --- | --- | --- | --- |
@@ -102,3 +102,42 @@ Dopuszczamy **tylko precyzyjne, udokumentowane wyjątki**, po technicznym potwie
 ---
 
 **Podsumowanie decyzji:** SecTicket ma działające zabezpieczenia i testy, ale najnowszy skan kontenera wykrył **44 wystąpienia HIGH z 8 unikalnymi CVE**. Zespół świadomie **utrzymuje widoczność problemu i otwarte zadania oceny**, zamiast maskować wynik skanera. Formalna akceptacja ryzyka lub wyłączenie wykrycia wymaga kolejnych dowodów i zatwierdzenia.
+
+
+## 6. Decyzja o czasowych wyjatkach CI (2026-11-01)
+
+Ta sekcja aktualizuje wczesniejsza polityke z rozdzialu 4.
+
+**Decyzja:** zespol SecTicket dopuszcza czasowy wyjatek CI
+dla osmiu CVE wymienionych w rejestrze R-01 do R-08.
+
+**Charakter:** warunkowa tolerancja znanego ryzyka w projekcie
+dydaktycznym. Nie jest to usuniecie podatnosci ani potwierdzenie
+braku mozliwosci ich wykorzystania.
+
+**Wlasciciel decyzji:** zespol SecTicket. Wdrozenie tej zmiany
+w Git wymaga zatwierdzenia przez osobe odpowiedzialna za repozytorium.
+
+**Termin przegladu:** 2026-11-08.
+**Wygasniecie wyjatkow:** 2026-11-30.
+
+**Warunki:**
+- Tylko lokalny development i demonstracje w zaufanej sieci.
+- Brak zgody na publiczne wdrozenie aplikacji.
+- Aplikacja uruchamiana jako uzytkownik bez uprawnien roota.
+- Ograniczenie capabilities i no-new-privileges w Compose.
+- Pelny raport Trivy pozostaje widoczny w GitHub Actions.
+- Nowe HIGH i CRITICAL nadal blokuja pipeline.
+- Wyjatki nie obejmuja automatycznie nowych identyfikatorow CVE.
+- Wyniki wymagaja ponownej oceny po aktualizacji obrazu.
+
+**Wymagane dalsze dzialania:** weryfikacja osiagnalnosci
+podatnych funkcji, aktualizacji Debiana i warunkow wykorzystania.
+W szczegolnosci CVE-2026-78409 wymaga wyjasnienia rozbieznosci
+pomiedzy informacjami o podatnych wersjach.
+
+**Implementacja:** `.trivyignore.yaml` oraz dwa skany w `ci.yml`:
+pelny raport bez wyjatkow i blokujaca kontrola z wyjatkami.
+
+**Status:** ryzyko warunkowo tolerowane do wskazanej daty;
+ocena techniczna i zadania naprawcze pozostaja otwarte.

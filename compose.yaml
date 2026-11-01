@@ -21,6 +21,12 @@ services:
     volumes:
       - secticket_data:/app/data
 
+    cap_drop:
+      - ALL
+
+    security_opt:
+      - no-new-privileges:true
+
     restart: unless-stopped
 
     healthcheck:
