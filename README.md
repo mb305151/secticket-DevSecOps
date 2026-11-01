@@ -197,7 +197,3 @@ start.sh              uruchomienie aplikacji
 test.sh               uruchomienie testów
 .trivyignore.yaml     czasowe wyjątki CVE
 ```
-
-## Materiały do oddania — etap 2
-
-Zgodnie z wymaganiami zajęć należy dołączyć na PZE aktualny `README.md`, zrzut podziału zadań, zrzut historii commitów wszystkich członków zespołu, zrzut działającej aplikacji oraz link do repozytorium. Prowadzący wymaga także co najmniej **dwóch commitów tygodniowo na osobę** (liczy się autor commita, a nie podpis w opisie).
