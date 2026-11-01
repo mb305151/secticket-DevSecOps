@@ -1,0 +1,12 @@
+{% macro status_badge(status) %}
+  {% if status == 'open' %}<span class="status-badge status-open"><span class="status-dot"></span>Otwarte</span>
+  {% elif status == 'in_progress' %}<span class="status-badge status-progress"><span class="status-dot"></span>W trakcie</span>
+  {% elif status == 'closed' %}<span class="status-badge status-closed"><span class="status-dot"></span>Zamknięte</span>
+  {% else %}<span class="status-badge status-neutral">{{ status }}</span>{% endif %}
+{% endmacro %}
+{% macro priority_badge(priority) %}
+  {% if priority == 'high' %}<span class="priority-badge priority-high">● Wysoki</span>
+  {% elif priority == 'medium' %}<span class="priority-badge priority-medium">● Średni</span>
+  {% elif priority == 'low' %}<span class="priority-badge priority-low">● Niski</span>
+  {% else %}<span class="priority-badge">{{ priority }}</span>{% endif %}
+{% endmacro %}

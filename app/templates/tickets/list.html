@@ -1,90 +1,14 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
+{% from '_badges.html' import status_badge, priority_badge %}
+{% block title %}Zgłoszenia{% endblock %}
+{% block topbar_title %}Zgłoszenia{% endblock %}
 {% block content %}
-<section class="ticket-panel">
-    <div class="ticket-header">
-        <div>
-            <h1>Zgloszenia</h1>
-            <p>
-                {% if current_user.role == "technician" %}
-                    Wszystkie zgloszenia w systemie.
-                {% else %}
-                    Zarzadzaj swoimi zgloszeniami.
-                {% endif %}
-            </p>
-        </div>
-
-        <a class="action-link"
-           href="{{ url_for('tickets.create') }}">
-            + Nowe zgloszenie
-        </a>
-    </div>
-
-    <form method="get"
-          action="{{ url_for('tickets.list_tickets') }}"
-          class="ticket-search">
-        <input type="search" name="q"
-               value="{{ query }}"
-               maxlength="100"
-               placeholder="Szukaj po tytule...">
-        <button type="submit">Szukaj</button>
-    </form>
-
-    {% if tickets.items %}
-        <div class="ticket-table-wrap">
-            <table class="ticket-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tytul</th>
-                        <th>Priorytet</th>
-                        <th>Status</th>
-                        <th>Akcja</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ticket in tickets.items %}
-                    <tr>
-                        <td>#{{ ticket.id }}</td>
-                        <td>{{ ticket.title }}</td>
-                        <td>{{ ticket.priority }}</td>
-                        <td>{{ ticket.status }}</td>
-                        <td>
-                            <a href="{{ url_for(
-                                'tickets.detail',
-                                ticket_id=ticket.id
-                            ) }}">Szczegoly</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p>Nie znaleziono zgloszen.</p>
-    {% endif %}
-
-    <div class="ticket-pagination">
-        {% if tickets.has_prev %}
-            <a href="{{ url_for(
-                'tickets.list_tickets',
-                page=tickets.prev_num,
-                q=query
-            ) }}">Poprzednia</a>
-        {% endif %}
-
-        <span>
-            Strona {{ tickets.page }}
-            z {{ tickets.pages if tickets.pages else 1 }}
-        </span>
-
-        {% if tickets.has_next %}
-            <a href="{{ url_for(
-                'tickets.list_tickets',
-                page=tickets.next_num,
-                q=query
-            ) }}">Nastepna</a>
-        {% endif %}
-    </div>
-</section>
+<div class="animate-rise"><div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><span class="eyebrow">Zarządzanie</span><h1 class="page-heading mt-3">Zgłoszenia</h1><p class="page-subtitle">{% if current_user.role == 'technician' %}Wszystkie zgłoszenia i zadania zespołu.{% else %}Przeglądaj i śledź swoje zgłoszenia.{% endif %}</p></div><a class="btn-primary self-start sm:self-auto" href="{{ url_for('tickets.create') }}"><span class="text-lg leading-none" aria-hidden="true">+</span> Nowe zgłoszenie</a></div>
+<section class="surface-card overflow-hidden" aria-label="Lista zgłoszeń"><div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:px-7"><div><h2 class="section-heading">Wszystkie zgłoszenia</h2><p class="mt-1 text-xs text-slate-400">Znaleziono {{ tickets.total }} {{ 'zgłoszeń' if tickets.total != 1 else 'zgłoszenie' }}</p></div><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">Strona {{ tickets.page }} / {{ tickets.pages if tickets.pages else 1 }}</span></div>
+  <div class="px-5 pt-5 sm:px-7"><form method="get" action="{{ url_for('tickets.list_tickets') }}" role="search" class="flex flex-col gap-3 sm:flex-row"><label class="sr-only" for="ticket-search">Szukaj po tytule zgłoszenia</label><div class="relative flex-1"><svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="ticket-search" class="field-input pl-12" type="search" name="q" value="{{ query }}" maxlength="100" placeholder="Szukaj po tytule..."></div><button type="submit" class="btn-outline justify-center">Szukaj</button>{% if query %}<a href="{{ url_for('tickets.list_tickets') }}" class="btn-ghost justify-center">Wyczyść</a>{% endif %}</form></div>
+  {% if tickets.items %}
+    <div class="mt-5 overflow-x-auto"><table class="ticket-table w-full text-left"><thead><tr><th scope="col">Zgłoszenie</th><th scope="col">Priorytet</th><th scope="col">Status</th><th scope="col" class="hidden md:table-cell">Dodano</th><th scope="col"><span class="sr-only">Akcje</span></th></tr></thead><tbody>{% for ticket in tickets.items %}<tr><td><div class="flex items-center gap-3"><div class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xs font-extrabold text-indigo-700 sm:flex">#{{ ticket.id }}</div><div class="min-w-[140px]"><a class="block max-w-[330px] truncate font-bold text-slate-800 hover:text-indigo-700" href="{{ url_for('tickets.detail', ticket_id=ticket.id) }}">{{ ticket.title }}</a><p class="mt-1 text-xs text-slate-400">#{{ ticket.id }} · {{ ticket.owner.username }}</p></div></div></td><td>{{ priority_badge(ticket.priority) }}</td><td>{{ status_badge(ticket.status) }}</td><td class="hidden whitespace-nowrap text-xs text-slate-500 md:table-cell">{{ ticket.created_at.strftime('%d.%m.%Y') }}</td><td><a href="{{ url_for('tickets.detail', ticket_id=ticket.id) }}" class="link-primary whitespace-nowrap">Otwórz <span aria-hidden="true">↗</span></a></td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<div class="empty-state"><span class="empty-icon" aria-hidden="true">⌕</span><h3 class="mt-4 text-lg font-bold">{{ 'Brak pasujących zgłoszeń' if query else 'Jeszcze nie ma zgłoszeń' }}</h3><p class="mt-2 text-sm text-slate-500">{{ 'Spróbuj innej frazy lub wyczyść wyszukiwanie.' if query else 'Utwórz pierwsze zgłoszenie, aby rozpocząć.' }}</p><a class="btn-primary mt-6" href="{{ url_for('tickets.create') }}">Utwórz zgłoszenie</a></div>{% endif %}
+  {% if tickets.pages > 1 %}<nav class="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 px-5 py-5 sm:px-7" aria-label="Stronicowanie zgłoszeń"><span class="text-xs font-medium text-slate-500">Strona {{ tickets.page }} z {{ tickets.pages }}</span><div class="flex gap-2">{% if tickets.has_prev %}<a class="btn-outline px-4 py-2 text-xs" href="{{ url_for('tickets.list_tickets', page=tickets.prev_num, q=query) }}">← Poprzednia</a>{% endif %}{% if tickets.has_next %}<a class="btn-outline px-4 py-2 text-xs" href="{{ url_for('tickets.list_tickets', page=tickets.next_num, q=query) }}">Następna →</a>{% endif %}</div></nav>{% endif %}
+</section></div>
 {% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Hasło tymczasowe{% endblock %}
+{% block topbar_title %}Reset hasła{% endblock %}
+{% block content %}
+<div class="animate-rise mx-auto max-w-2xl"><span class="eyebrow">Administracja</span><h1 class="page-heading mt-3">Hasło zostało zresetowane</h1><p class="page-subtitle">Dla konta <strong>{{ target.username }}</strong>. Dotychczasowe sesje użytkownika są nieważne.</p>
+  <section class="surface-card mt-7 p-7"><div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-900" role="status">To hasło zostanie wyświetlone tylko teraz. Skopiuj je i przekaż użytkownikowi prywatnie. Nie rób zrzutów ekranu ani nie umieszczaj go w Git.</div>
+    <label for="one-time-password" class="field-label mt-6">Nowe hasło tymczasowe</label><input id="one-time-password" class="field-input font-mono text-base tracking-wider" value="{{ temporary_password }}" readonly autocomplete="off" spellcheck="false" aria-describedby="pw-help"><p id="pw-help" class="field-hint">Przy pierwszym logowaniu użytkownik będzie musiał ustawić własne hasło.</p>
+    <div class="mt-6"><a href="{{ url_for('profiles.edit_user', user_id=target.id) }}" class="btn-primary">Wróć do profilu użytkownika →</a></div></section>
+</div>
+{% endblock %}

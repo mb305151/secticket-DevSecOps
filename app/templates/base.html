@@ -1,51 +1,78 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1">
-    <title>SecTicket</title>
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='app.css') }}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8fc">
+  <meta name="description" content="SecTicket — bezpieczny panel do zarządzania zgłoszeniami.">
+  <title>{% block title %}SecTicket{% endblock %} · SecTicket</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='tailwind.css') }}">
+  <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
 </head>
-<body>
-    <header class="navbar">
-        <a href="{{ url_for('index') }}" class="brand">
-            SecTicket
-        </a>
-
-        <nav>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('dashboard') }}">
-                    Panel
-                </a>
-                <form method="post"
-                      action="{{ url_for('auth.logout') }}">
-                    <input type="hidden"
-                           name="csrf_token"
-                           value="{{ csrf_token() }}">
-                    <button type="submit">Wyloguj</button>
-                </form>
-            {% else %}
-                <a href="{{ url_for('auth.login') }}">
-                    Zaloguj
-                </a>
-                <a href="{{ url_for('auth.register') }}">
-                    Zarejestruj
-                </a>
-            {% endif %}
+<body class="min-h-screen bg-surface font-sans text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-white focus:px-4 focus:py-3 focus:shadow-xl">Przejdź do treści</a>
+  {% if current_user.is_authenticated and request.endpoint != 'index' %}
+    <div class="min-h-screen lg:flex">
+      <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/45 backdrop-blur-[2px] lg:hidden" data-close-sidebar></div>
+      <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-[270px] -translate-x-full flex-col border-r border-slate-200/80 bg-white px-4 pb-5 pt-6 shadow-2xl shadow-slate-900/10 transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shadow-none" aria-label="Menu główne">
+        <div class="mb-10 flex items-center justify-between px-3">
+          <a href="{{ url_for('index') }}" class="group flex items-center gap-3" aria-label="SecTicket — strona główna">
+            <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1.5 3H20v5a3 3 0 0 0 0 6v4H4v-4a3 3 0 0 0 0-6V6h3.5L9 3Z"/><path d="M12 8v8" stroke-dasharray="2 3"/></svg></span>
+            <span class="leading-tight"><strong class="block text-[17px] font-extrabold tracking-tight text-slate-950">SecTicket</strong><span class="block text-[10px] font-semibold uppercase tracking-[.24em] text-slate-400">Support workspace</span></span>
+          </a>
+          <button type="button" data-close-sidebar class="icon-button lg:hidden" aria-label="Zamknij menu"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div class="mb-3 px-4 text-[10px] font-bold uppercase tracking-[.24em] text-slate-400">Przestrzeń robocza</div>
+        <nav class="flex flex-1 flex-col gap-1" aria-label="Nawigacja">
+          <a class="nav-link" href="{{ url_for('index') }}"><svg viewBox="0 0 24 24" class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7"/></svg>Strona główna</a>
+          <a class="nav-link {% if request.endpoint == 'dashboard' %}nav-link-active{% endif %}" href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}aria-current="page"{% endif %}><svg viewBox="0 0 24 24" class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Przegląd</a>
+          <a class="nav-link {% if request.endpoint and request.endpoint.startswith('tickets.') and request.endpoint != 'tickets.create' %}nav-link-active{% endif %}" href="{{ url_for('tickets.list_tickets') }}" {% if request.endpoint == 'tickets.list_tickets' %}aria-current="page"{% endif %}><svg viewBox="0 0 24 24" class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Zgłoszenia</a>
+          <a class="nav-link {% if request.endpoint == 'tickets.create' %}nav-link-active{% endif %}" href="{{ url_for('tickets.create') }}" {% if request.endpoint == 'tickets.create' %}aria-current="page"{% endif %}><svg viewBox="0 0 24 24" class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Nowe zgłoszenie</a>
+          <div class="my-3 border-t border-slate-100"></div>
+          <a class="nav-link {% if request.endpoint and request.endpoint.startswith('profiles.') and request.endpoint not in ('profiles.users', 'profiles.edit_user', 'profiles.reset_user_password') %}nav-link-active{% endif %}" href="{{ url_for('profiles.my_profile') }}" {% if request.endpoint == 'profiles.my_profile' %}aria-current="page"{% endif %}><svg viewBox="0 0 24 24" class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>Mój profil</a>
+          {% if current_user.is_admin %}<a class="nav-link {% if request.endpoint in ('profiles.users', 'profiles.edit_user', 'profiles.reset_user_password') %}nav-link-active{% endif %}" href="{{ url_for('profiles.users') }}" {% if request.endpoint == 'profiles.users' %}aria-current="page"{% endif %}><svg viewBox="0 0 24 24" class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2.5 20v-2a6.5 6.5 0 0 1 13 0v2M17 7a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4.5 5"/></svg>Użytkownicy</a>{% endif %}
         </nav>
-    </header>
-
-    <main class="container">
-        {% for category, message in
-           get_flashed_messages(with_categories=True) %}
-            <div class="alert {{ category }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-
-        {% block content %}{% endblock %}
-    </main>
+        <div class="mt-auto rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4">
+          <span class="inline-flex rounded-lg bg-white p-2 text-indigo-600 shadow-sm" aria-hidden="true"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <p class="mt-3 text-sm font-bold text-slate-900">Bezpieczeństwo na pierwszym miejscu</p>
+          <p class="mt-1 text-xs leading-relaxed text-slate-500">Twoje zgłoszenia są dostępne wyłącznie dla uprawnionych osób.</p>
+        </div>
+        <div class="mt-5 flex items-center gap-3 border-t border-slate-100 px-2 pt-5">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-sm font-extrabold text-indigo-700" aria-hidden="true">{{ current_user.username[:2]|upper }}</div>
+          <div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-900">{{ current_user.username }}</p><p class="text-xs text-slate-500">{{ 'Administrator' if current_user.is_admin else ('Technik' if current_user.role == 'technician' else 'Użytkownik') }}</p></div>
+          <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="icon-button" title="Wyloguj" aria-label="Wyloguj"><svg viewBox="0 0 24 24" class="h-[19px] w-[19px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></form>
+        </div>
+      </aside>
+      <div class="min-w-0 flex-1">
+        <header class="sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-slate-200/70 bg-surface/90 px-5 backdrop-blur-xl sm:px-8 lg:px-10">
+          <div class="flex items-center gap-3"><button type="button" id="sidebar-toggle" class="icon-button lg:hidden" aria-label="Otwórz menu" aria-expanded="false" aria-controls="app-sidebar"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div><p class="text-[11px] font-semibold uppercase tracking-[.2em] text-slate-400">SecTicket / Workspace</p><p class="text-sm font-semibold text-slate-700">{% block topbar_title %}Centrum zgłoszeń{% endblock %}</p></div></div>
+          <div class="flex items-center gap-3"><span class="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:inline-flex"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Panel aktywny</span><span class="flex h-9 w-9 items-center justify-center rounded-full border border-white bg-indigo-100 text-xs font-bold text-indigo-700 shadow-sm" title="{{ current_user.username }}">{{ current_user.username[:2]|upper }}</span></div>
+        </header>
+        <main id="main-content" class="mx-auto w-full max-w-[1320px] px-5 pb-16 pt-7 sm:px-8 sm:pt-9 lg:px-10">
+          {% include '_flashes.html' %}
+  {% else %}
+    <div class="relative min-h-screen overflow-hidden"><div class="pointer-events-none absolute -left-32 top-16 h-96 w-96 rounded-full bg-indigo-200/35 blur-[100px]"></div><div class="pointer-events-none absolute -right-24 top-64 h-96 w-96 rounded-full bg-sky-200/40 blur-[100px]"></div>
+      <header class="relative z-10 mx-auto flex h-24 max-w-7xl items-center justify-between px-5 sm:px-8"><a href="{{ url_for('index') }}" class="flex items-center gap-3"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6l1.5 3H20v5a3 3 0 0 0 0 6v4H4v-4a3 3 0 0 0 0-6V6h3.5L9 3Z"/><path d="M12 8v8" stroke-dasharray="2 3"/></svg></span><strong class="text-xl font-extrabold tracking-tight">SecTicket</strong></a><nav class="flex items-center gap-2" aria-label="Nawigacja">
+        {% if current_user.is_authenticated %}
+          <a class="btn-primary px-4 py-2.5 text-sm" href="{{ url_for('dashboard') }}">Przejdź do panelu <span aria-hidden="true">↗</span></a>
+        {% else %}
+          <a class="btn-ghost text-sm" href="{{ url_for('auth.login') }}">Zaloguj</a>
+          <a class="btn-primary px-4 py-2.5 text-sm" href="{{ url_for('auth.register') }}">Załóż konto <span aria-hidden="true">↗</span></a>
+        {% endif %}
+      </nav></header>
+      <main id="main-content" class="relative z-10 mx-auto max-w-7xl px-5 pb-20 pt-8 sm:px-8 sm:pt-12">
+        {% include '_flashes.html' %}
+  {% endif %}
+  {% block content %}{% endblock %}
+  {% if current_user.is_authenticated and request.endpoint != 'index' %}
+        </main>
+      </div>
+    </div>
+  {% else %}
+      </main>
+      <footer class="relative mx-auto flex max-w-7xl flex-col justify-between gap-3 border-t border-slate-200/70 px-5 py-6 text-xs text-slate-400 sm:flex-row sm:px-8"><span>© SecTicket · Projekt DevSecOps</span><span>Przejrzystość. Bezpieczeństwo. Współpraca.</span></footer>
+    </div>
+  {% endif %}
+  {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,144 +1,16 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
+{% from '_badges.html' import status_badge, priority_badge %}
+{% block title %}Zgłoszenie #{{ ticket.id }}{% endblock %}
+{% block topbar_title %}Szczegóły zgłoszenia{% endblock %}
 {% block content %}
-<section class="ticket-panel">
-
-    <p>
-        <a href="{{ url_for('tickets.list_tickets') }}">
-            Powrot do zgloszen
-        </a>
-    </p>
-
-    <h1>{{ ticket.title }}</h1>
-
-    <div class="ticket-metadata">
-        <p><strong>ID:</strong> #{{ ticket.id }}</p>
-        <p><strong>Autor:</strong> {{ ticket.owner.username }}</p>
-        <p><strong>Priorytet:</strong> {{ ticket.priority }}</p>
-        <p><strong>Status:</strong> {{ ticket.status }}</p>
-        <p><strong>Utworzono:</strong> {{ ticket.created_at }}</p>
-    </div>
-
-    <h2>Opis usterki</h2>
-
-    <div class="ticket-description">
-        {{ ticket.description }}
-    </div>
-
-    {% if current_user.role == "technician" %}
-    <div class="ticket-section">
-        <h2>Obsluga techniczna</h2>
-
-        <form method="post"
-              action="{{ url_for(
-                'tickets.change_status',
-                ticket_id=ticket.id
-              ) }}">
-
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
-
-            <label for="status">Status zgloszenia</label>
-
-            <select id="status" name="status">
-                {% for value, label in [
-                    ('open', 'Otwarte'),
-                    ('in_progress', 'W trakcie'),
-                    ('closed', 'Zamkniete')
-                ] %}
-                <option value="{{ value }}"
-                    {% if ticket.status == value %}
-                        selected
-                    {% endif %}>
-                    {{ label }}
-                </option>
-                {% endfor %}
-            </select>
-
-            <button class="primary" type="submit">
-                Zmien status
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
-    {% if ticket.user_id == current_user.id %}
-    <div class="ticket-actions">
-        <a class="action-link"
-           href="{{ url_for(
-               'tickets.edit',
-               ticket_id=ticket.id
-           ) }}">
-            Edytuj
-        </a>
-
-        <form method="post"
-              action="{{ url_for(
-                  'tickets.delete',
-                  ticket_id=ticket.id
-              ) }}"
-              onsubmit="return confirm(
-                'Czy na pewno usunac zgloszenie?'
-              )">
-
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
-
-            <button type="submit" class="delete-button">
-                Usun zgloszenie
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
-    <div class="ticket-section">
-        <h2>Komentarze</h2>
-
-        {% if comments %}
-            <div class="comments-list">
-                {% for comment in comments %}
-                <article class="comment">
-                    <div class="comment-header">
-                        <strong>{{ comment.author.username }}</strong>
-                        <span>{{ comment.created_at }}</span>
-                    </div>
-
-                    <div class="comment-content">
-                        {{ comment.content }}
-                    </div>
-                </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>Brak komentarzy.</p>
-        {% endif %}
-
-        <h3>Dodaj komentarz</h3>
-
-        <form method="post"
-              action="{{ url_for(
-                  'tickets.add_comment',
-                  ticket_id=ticket.id
-              ) }}">
-
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
-
-            <label for="content">Tresc komentarza</label>
-
-            <textarea id="content"
-                      name="content"
-                      maxlength="2000"
-                      rows="4"
-                      required></textarea>
-
-            <button class="primary" type="submit">
-                Dodaj komentarz
-            </button>
-        </form>
-    </div>
-</section>
+<div class="animate-rise"><a href="{{ url_for('tickets.list_tickets') }}" class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-indigo-700">← Wróć do zgłoszeń</a><div class="mb-7 flex flex-col justify-between gap-5 sm:flex-row sm:items-start"><div class="min-w-0"><div class="mb-4 flex flex-wrap items-center gap-3"><span class="eyebrow">Zgłoszenie #{{ ticket.id }}</span>{{ status_badge(ticket.status) }}</div><h1 class="page-heading break-words">{{ ticket.title }}</h1><p class="page-subtitle">Utworzono {{ ticket.created_at.strftime('%d.%m.%Y o %H:%M') }} przez {{ ticket.owner.username }}</p></div>{% if ticket.user_id == current_user.id %}<a href="{{ url_for('tickets.edit', ticket_id=ticket.id) }}" class="btn-outline self-start">✎ Edytuj zgłoszenie</a>{% endif %}</div>
+  <div class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"><div class="space-y-6"><section class="surface-card p-6 sm:p-8"><div class="flex items-center gap-3"><span class="metric-icon bg-indigo-50 text-indigo-600">☷</span><h2 class="section-heading">Opis problemu</h2></div><div class="mt-6 whitespace-pre-wrap break-words text-sm leading-8 text-slate-600">{{ ticket.description }}</div></section>
+    <section class="surface-card p-6 sm:p-8" aria-labelledby="comments-heading"><div class="flex items-center justify-between gap-4 border-b border-slate-100 pb-6"><div><h2 id="comments-heading" class="section-heading">Komentarze</h2><p class="mt-1 text-sm text-slate-500">Historia komunikacji dotyczącej zgłoszenia</p></div><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ comments|length }}</span></div>
+      {% if comments %}<div class="mt-6 space-y-6">{% for comment in comments %}<article class="flex items-start gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-xs font-extrabold text-indigo-700" aria-hidden="true">{{ comment.author.username[:2]|upper }}</div><div class="min-w-0 flex-1 rounded-2xl rounded-tl-md border border-slate-100 bg-slate-50/70 p-4"><div class="flex flex-wrap items-center justify-between gap-2"><strong class="text-sm text-slate-800">{{ comment.author.username }}</strong><time class="text-xs text-slate-400">{{ comment.created_at.strftime('%d.%m.%Y, %H:%M') }}</time></div><p class="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-600">{{ comment.content }}</p></div></article>{% endfor %}</div>{% else %}<div class="py-9 text-center"><span class="text-3xl" aria-hidden="true">☏</span><p class="mt-3 text-sm font-semibold text-slate-700">Brak komentarzy</p><p class="mt-1 text-xs text-slate-500">Zacznij rozmowę na temat zgłoszenia.</p></div>{% endif %}
+      <form method="post" action="{{ url_for('tickets.add_comment', ticket_id=ticket.id) }}" class="mt-7 border-t border-slate-100 pt-7"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label for="content" class="field-label">Dodaj komentarz</label><textarea id="content" name="content" rows="4" maxlength="2000" required class="field-input min-h-28 resize-y" placeholder="Napisz wiadomość..." aria-describedby="comment-hint"></textarea><p id="comment-hint" class="field-hint">Maksymalnie 2000 znaków.</p><button type="submit" class="btn-primary mt-4">Dodaj komentarz <span aria-hidden="true">→</span></button></form></section>
+  </div><aside class="space-y-5"><section class="surface-card p-6"><h2 class="section-heading">Informacje</h2><dl class="mt-5 space-y-5"><div class="flex items-center justify-between gap-3"><dt class="text-sm text-slate-500">Numer</dt><dd class="text-sm font-bold">#{{ ticket.id }}</dd></div><div class="flex items-center justify-between gap-3"><dt class="text-sm text-slate-500">Status</dt><dd>{{ status_badge(ticket.status) }}</dd></div><div class="flex items-center justify-between gap-3"><dt class="text-sm text-slate-500">Priorytet</dt><dd>{{ priority_badge(ticket.priority) }}</dd></div><div class="flex items-center justify-between gap-3"><dt class="text-sm text-slate-500">Autor</dt><dd class="max-w-[150px] truncate text-sm font-bold" title="{{ ticket.owner.username }}">{{ ticket.owner.username }}</dd></div><div class="flex items-center justify-between gap-3"><dt class="text-sm text-slate-500">Utworzono</dt><dd class="text-xs font-semibold">{{ ticket.created_at.strftime('%d.%m.%Y') }}</dd></div></dl></section>
+    {% if current_user.role == 'technician' %}<section class="surface-card p-6"><div class="mb-5 flex items-center gap-3"><span class="metric-icon bg-indigo-50 text-indigo-600">⚙</span><div><h2 class="text-sm font-extrabold">Obsługa techniczna</h2><p class="text-xs text-slate-500">Aktualizuj postęp pracy</p></div></div><form method="post" action="{{ url_for('tickets.change_status', ticket_id=ticket.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label for="status" class="field-label">Status zgłoszenia</label><select class="field-input" id="status" name="status">{% for value, label in [('open','Otwarte'),('in_progress','W trakcie'),('closed','Zamknięte')] %}<option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="btn-primary mt-4 w-full justify-center" type="submit">Zmień status</button></form></section>{% endif %}
+    {% if ticket.user_id == current_user.id %}<section class="rounded-[22px] border border-rose-100 bg-rose-50/50 p-6"><h2 class="text-sm font-extrabold text-rose-800">Usuń zgłoszenie</h2><p class="mt-2 text-xs leading-5 text-rose-700/75">Usunięcie zgłoszenia jest nieodwracalne i może usunąć powiązane komentarze.</p><form method="post" action="{{ url_for('tickets.delete', ticket_id=ticket.id) }}" data-confirm="Czy na pewno chcesz trwale usunąć zgłoszenie?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn-danger mt-4">Usuń zgłoszenie</button></form></section>{% endif %}
+  </aside></div>
+</div>
 {% endblock %}

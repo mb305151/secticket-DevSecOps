@@ -21,6 +21,9 @@ EVENT_TYPES = {
     "auth.register_rate_limited",
     "account.role_granted",
     "account.password_reset",
+    "account.profile_updated",
+    "account.password_changed",
+    "account.admin_granted",
     "ticket.status_changed",
 }
 

@@ -1,63 +1,10 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
+{% block title %}Rejestracja{% endblock %}
 {% block content %}
-<section class="card">
-    <h1>Utworz konto</h1>
-    <p>Zarejestruj sie w systemie SecTicket.</p>
-
-    <form method="post">
-        <input type="hidden"
-               name="csrf_token"
-               value="{{ csrf_token() }}">
-
-        <label for="username">Login</label>
-        <input id="username" name="username"
-               type="text" required minlength="3"
-               maxlength="30" autocomplete="username">
-
-        <label for="email">E-mail</label>
-        <input id="email" name="email"
-               type="email" required maxlength="254"
-               autocomplete="email">
-
-        <label for="password">Haslo</label>
-        <input id="password" name="password"
-               type="password" required
-               minlength="12" maxlength="128"
-               autocomplete="new-password"
-               aria-describedby="password-rules">
-
-        <ul id="password-rules" class="password-rules">
-            <li data-rule="length">12-128 znakow</li>
-            <li data-rule="lower">Mala litera</li>
-            <li data-rule="upper">Wielka litera</li>
-            <li data-rule="digit">Cyfra</li>
-            <li data-rule="special">Znak specjalny</li>
-        </ul>
-
-        <label for="confirm_password">
-            Powtorz haslo
-        </label>
-        <input id="confirm_password"
-               name="confirm_password"
-               type="password" required
-               autocomplete="new-password">
-
-        <p id="password-match" aria-live="polite"></p>
-
-        <button type="submit" class="primary">
-            Zarejestruj
-        </button>
-    </form>
-
-    <p>
-        Masz konto?
-        <a href="{{ url_for('auth.login') }}">
-            Zaloguj sie
-        </a>
-    </p>
-</section>
-
-<script src="{{ url_for('static', filename='password.js') }}"
-        defer></script>
+<div class="mx-auto max-w-[600px] py-4 sm:py-8"><section class="animate-rise auth-card" aria-labelledby="register-heading"><div class="mb-7"><span class="eyebrow">Zacznij od konta</span><h1 id="register-heading" class="mt-3 text-3xl font-extrabold tracking-tight text-slate-950">Dołącz do SecTicket</h1><p class="mt-2 text-sm text-slate-500">Załóż konto, aby dodawać i śledzić zgłoszenia.</p></div>
+  <form method="post" class="space-y-5"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="grid gap-5 sm:grid-cols-2"><div><label class="field-label" for="username">Login</label><input class="field-input" id="username" name="username" type="text" required minlength="3" maxlength="30" autocomplete="username" placeholder="Twój login"></div><div><label class="field-label" for="email">E-mail</label><input class="field-input" id="email" name="email" type="email" required maxlength="254" autocomplete="email" placeholder="email@przykład.pl"></div></div>
+    <div><label class="field-label" for="password">Hasło</label><input class="field-input" id="password" name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="password-rules" placeholder="Minimum 12 znaków"><p class="mt-3 text-xs font-medium text-slate-500">Bezpieczne hasło powinno spełniać wszystkie warunki:</p><ul id="password-rules" class="password-rules mt-3 grid grid-cols-2 gap-2 text-xs"><li data-rule="length">12–128 znaków</li><li data-rule="lower">Mała litera</li><li data-rule="upper">Wielka litera</li><li data-rule="digit">Cyfra</li><li data-rule="special">Znak specjalny</li></ul></div>
+    <div><label class="field-label" for="confirm_password">Potwierdź hasło</label><input class="field-input" id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password" placeholder="Powtórz hasło"><p id="password-match" class="mt-2 min-h-5 text-xs font-medium" aria-live="polite"></p></div>
+    <button type="submit" class="btn-primary w-full justify-center py-3.5">Utwórz konto <span aria-hidden="true">→</span></button></form><p class="mt-7 border-t border-slate-100 pt-6 text-center text-sm text-slate-500">Masz już konto? <a class="link-primary" href="{{ url_for('auth.login') }}">Zaloguj się</a></p></section></div>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='password.js') }}" defer></script>{% endblock %}

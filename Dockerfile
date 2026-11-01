@@ -1,3 +1,12 @@
+# Tailwind CSS v4 is built only at image build time (no Node.js in runtime).
+FROM node:22-alpine AS frontend
+WORKDIR /frontend
+COPY package.json ./
+RUN npm install --no-audit --no-fund
+COPY app/templates/ ./app/templates/
+COPY app/static/styles.css ./app/static/styles.css
+RUN npm run build:css
+
 FROM python:3.13-slim-trixie AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -16,6 +25,7 @@ RUN groupadd -g 10001 secticket \
     && chown secticket:secticket /app/data
 
 COPY --chown=secticket:secticket app/ ./app/
+COPY --from=frontend /frontend/app/static/tailwind.css ./app/static/tailwind.css
 COPY --chown=secticket:secticket migrations/ ./migrations/
 COPY --chown=secticket:secticket \
     docker/entrypoint.sh /usr/local/bin/secticket-entrypoint

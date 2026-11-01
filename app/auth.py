@@ -232,7 +232,9 @@ def login():
             login_user(user, remember=False)
 
             return redirect(
-                url_for("dashboard")
+                url_for("profiles.change_password")
+                if user.must_change_password
+                else url_for("dashboard")
             )
 
         # Bledne logowanie - aktualizujemy oba liczniki.

@@ -1,35 +1,8 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
+{% block title %}Logowanie{% endblock %}
 {% block content %}
-<section class="card">
-    <h1>Logowanie</h1>
-    <p>Zaloguj sie do SecTicket.</p>
-
-    <form method="post">
-        <input type="hidden"
-               name="csrf_token"
-               value="{{ csrf_token() }}">
-
-        <label for="identifier">Login lub e-mail</label>
-        <input id="identifier" name="identifier"
-               type="text" required
-               autocomplete="username">
-
-        <label for="password">Haslo</label>
-        <input id="password" name="password"
-               type="password" required
-               autocomplete="current-password">
-
-        <button type="submit" class="primary">
-            Zaloguj
-        </button>
-    </form>
-
-    <p>
-        Nie masz konta?
-        <a href="{{ url_for('auth.register') }}">
-            Zarejestruj sie
-        </a>
-    </p>
-</section>
+<div class="mx-auto grid max-w-[1030px] items-center gap-12 py-8 lg:grid-cols-[1fr_1.1fr] lg:py-12">
+  <div class="animate-rise hidden lg:block"><span class="eyebrow">Witaj ponownie</span><h1 class="mt-7 text-5xl font-extrabold leading-tight tracking-[-.05em]">Wróć do swoich<br><span class="gradient-text">zgłoszeń.</span></h1><p class="mt-6 max-w-sm text-lg leading-relaxed text-slate-500">Sprawdzaj postęp prac i rozmawiaj z zespołem wsparcia w jednym miejscu.</p><div class="mt-10 space-y-5"><p class="flex items-center gap-3 text-sm font-semibold text-slate-600"><span class="feature-check">✓</span> Przejrzyste statusy zgłoszeń</p><p class="flex items-center gap-3 text-sm font-semibold text-slate-600"><span class="feature-check">✓</span> Bezpieczny dostęp do konta</p><p class="flex items-center gap-3 text-sm font-semibold text-slate-600"><span class="feature-check">✓</span> Wszystkie informacje w jednym miejscu</p></div></div>
+  <section class="animate-rise auth-card [animation-delay:100ms]" aria-labelledby="login-heading"><div class="mb-8"><span class="eyebrow">Dostęp do panelu</span><h1 id="login-heading" class="mt-3 text-3xl font-extrabold tracking-tight text-slate-950">Zaloguj się</h1><p class="mt-2 text-sm text-slate-500">Podaj dane swojego konta SecTicket.</p></div><form method="post" class="space-y-5"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div><label class="field-label" for="identifier">Login lub adres e-mail</label><input class="field-input" id="identifier" name="identifier" type="text" required autocomplete="username" autofocus placeholder="np. jan.kowalski"></div><div><div class="flex items-center justify-between"><label class="field-label" for="password">Hasło</label></div><input class="field-input" id="password" name="password" type="password" required autocomplete="current-password" placeholder="Wprowadź hasło"></div><button type="submit" class="btn-primary w-full justify-center py-3.5">Zaloguj się <span aria-hidden="true">→</span></button></form><p class="mt-8 border-t border-slate-100 pt-6 text-center text-sm text-slate-500">Nie masz konta? <a class="link-primary" href="{{ url_for('auth.register') }}">Utwórz konto</a></p></section>
+</div>
 {% endblock %}

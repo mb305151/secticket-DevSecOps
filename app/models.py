@@ -33,6 +33,15 @@ class User(UserMixin, db.Model):
         nullable=False
     )
 
+    # User profile fields are optional for accounts created before migration.
+    full_name = db.Column(db.String(120), nullable=True)
+    phone = db.Column(db.String(30), nullable=True)
+    organization = db.Column(db.String(120), nullable=True)
+    # Admin permission is separate from the existing ticket-related role.
+    is_admin = db.Column(db.Boolean, nullable=False, default=False, server_default="0")
+    auth_version = db.Column(db.Integer, nullable=False, default=1, server_default="1")
+    must_change_password = db.Column(db.Boolean, nullable=False, default=False, server_default="0")
+
     role = db.Column(
         db.String(20),
         nullable=False,
@@ -64,6 +73,11 @@ class User(UserMixin, db.Model):
             name="ck_users_role"
         ),
     )
+
+
+    def get_id(self):
+        # Flask-Login checks the version of the session on every request.
+        return f"{self.id}:{self.auth_version}"
 
 
 class Ticket(db.Model):

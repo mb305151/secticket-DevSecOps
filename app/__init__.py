@@ -3,7 +3,7 @@ import sqlite3
 
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, redirect, request, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
@@ -73,15 +73,34 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         try:
-            return db.session.get(models.User, int(user_id))
-        except (TypeError, ValueError):
-            return None
+            pk, version = user_id.split(":", 1)
+            user = db.session.get(models.User, int(pk))
+            if user is not None and user.auth_version == int(version):
+                return user
+        except (TypeError, ValueError, AttributeError):
+            pass
+        return None
 
     from .auth import auth_bp
     app.register_blueprint(auth_bp)
 
     from .tickets import tickets_bp
     app.register_blueprint(tickets_bp)
+
+    from .profiles import profiles_bp
+    app.register_blueprint(profiles_bp)
+
+    @app.before_request
+    def require_new_password_after_reset():
+        # A temporary password may only be used to set a personal password.
+        if (
+            current_user.is_authenticated
+            and current_user.must_change_password
+            and request.endpoint not in {
+                "profiles.change_password", "auth.logout", "static", "health"
+            }
+        ):
+            return redirect(url_for("profiles.change_password"))
 
     from .cli import register_cli
     register_cli(app)
@@ -96,9 +115,37 @@ def create_app():
     @app.get("/dashboard")
     @login_required
     def dashboard():
+        # Counts are scoped to the logged-in user unless they are a technician.
+        from sqlalchemy import func, select
+        from .models import Ticket
+
+        scope = []
+        if current_user.role != "technician":
+            scope.append(Ticket.user_id == current_user.id)
+
+        stats = {
+            "total": db.session.scalar(
+                select(func.count(Ticket.id)).where(*scope)
+            ) or 0,
+        }
+        for status in ("open", "in_progress", "closed"):
+            stats[status] = db.session.scalar(
+                select(func.count(Ticket.id)).where(
+                    *scope, Ticket.status == status
+                )
+            ) or 0
+
+        recent_tickets = db.session.scalars(
+            select(Ticket)
+            .where(*scope)
+            .order_by(Ticket.created_at.desc(), Ticket.id.desc())
+            .limit(5)
+        ).all()
         return render_template(
             "dashboard.html",
             user=current_user,
+            stats=stats,
+            recent_tickets=recent_tickets,
         )
 
     @app.get("/health")

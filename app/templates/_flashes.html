@@ -1,0 +1,13 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mb-7 space-y-3" aria-live="polite">
+      {% for category, message in messages %}
+        <div class="flash-message {% if category == 'error' %}flash-error{% elif category == 'success' %}flash-success{% else %}flash-info{% endif %}" role="{{ 'alert' if category == 'error' else 'status' }}">
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-current/10 text-sm" aria-hidden="true">{{ '!' if category == 'error' else '✓' if category == 'success' else 'i' }}</span>
+          <p class="flex-1 text-sm font-medium">{{ message }}</p>
+          <button type="button" class="icon-button h-7 w-7" data-dismiss-flash aria-label="Zamknij powiadomienie">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
