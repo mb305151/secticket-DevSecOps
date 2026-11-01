@@ -1,5 +1,7 @@
 # SecTicket Pipeline
 
+## Krótki opis
+
 **SecTicket** to aplikacja webowa do obsługi zgłoszeń usterek, przygotowana w ramach zajęć „Projektowanie, Bezpieczeństwo i Operacje (DevSecOps)”. Użytkownicy mogą zgłaszać problemy i śledzić ich realizację, a technicy obsługują zgłoszenia. Aplikacja ma również panel administracyjny do zarządzania profilami użytkowników.
 
 Projekt koncentruje się na uruchamianiu w kontenerze Docker, walidacji i kontroli dostępu, testach oraz automatycznym sprawdzaniu bezpieczeństwa w GitHub Actions.
@@ -22,6 +24,18 @@ Podział obszarów odpowiada założeniom projektu. Faktyczne autorstwo zmian mo
 - **Konteneryzacja:** Docker oraz Docker Compose.
 - **Testy:** pytest.
 - **CI / bezpieczeństwo:** GitHub Actions, Bandit, pip-audit i Trivy.
+
+## Gałęzie
+
+| Gałąź | Przeznaczenie | Status |
+| --- | --- | --- |
+| `main` | Główna gałąź projektu | Docelowe miejsce scalania ukończonych zmian |
+| `feat/etap2-bootstrap` | Rozwój aplikacji i realizacja etapu 2 | Aktualna gałąź robocza |
+| `vulnerable` | Celowo podatna wersja do demonstracji wykrywania błędów bezpieczeństwa | Planowana na późniejszy etap |
+
+Gałąź `vulnerable` będzie wykorzystywana wyłącznie w
+kontrolowanym środowisku testowym. Nie będzie scalana
+do `main` ani udostępniana jako aplikacja produkcyjna.
 
 ## Wymagania środowiskowe
 
@@ -180,6 +194,30 @@ Workflow `.github/workflows/ci.yml` uruchamia testy i kontrolę migracji, skan k
 **Polityka CVE:** Trivy generuje pełny raport wykryć. Osobny krok blokuje niezaakceptowane podatności HIGH/CRITICAL. Wybrane, wcześniej ocenione CVE mają czasowe wyjątki zapisane w `.trivyignore.yaml`, z uzasadnieniem i terminem wygaśnięcia **30 listopada 2026 r.** Nie oznacza to usunięcia tych podatności ani dopuszczenia aplikacji do produkcyjnego wdrożenia w internecie. Nowe CVE spoza wyjątków nadal blokują pipeline. Założenia wyjątków wymagają ponownego przeglądu po zmianie obrazu lub funkcji aplikacji.
 
 **Ograniczenia wersji demonstracyjnej:** aplikacja działa lokalnie przez HTTP; zarządzanie adresami e-mail nie obejmuje potwierdzania ich własności ani wysyłania poczty. Przed publikacją internetową konieczne byłyby dodatkowa konfiguracja HTTPS, przegląd bezpieczeństwa i polityka wdrożenia.
+
+## Dokumenty etapu 1
+
+- `REQUIREMENTS.md` — wymagania funkcjonalne, bezpieczeństwa
+  i model zagrożeń aplikacji.
+- `BACKLOG.md` — plan zadań i podział odpowiedzialności
+  w zespole.
+
+- `diagram-schemat-aplikacji.mmd` — diagram działania aplikacji.
+
+## Dokumenty etapu 2
+
+- `README.md` — aktualny opis projektu, wymagania środowiskowe,
+  instalacja, uruchamianie i przykładowe żądania HTTP.
+- `requirements.txt` — zależności aplikacji.
+- `requirements-dev.txt` — zależności testowe.
+- `package.json` — zależności frontendu Tailwind CSS.
+- `migrations/` — migracje schematu bazy danych.
+- `tests/` — testy aplikacji i zabezpieczeń.
+- `start.sh` i `test.sh` — skrypty uruchamiania i testowania.
+- `.github/workflows/ci.yml` — pipeline testów i skanów
+  bezpieczeństwa.
+- `.trivyignore.yaml` — czasowe wyjątki CVE wraz
+  z uzasadnieniem i terminem wygaśnięcia.
 
 ## Struktura repozytorium
 
