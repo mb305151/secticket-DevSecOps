@@ -141,3 +141,50 @@ pelny raport bez wyjatkow i blokujaca kontrola z wyjatkami.
 
 **Status:** ryzyko warunkowo tolerowane do wskazanej daty;
 ocena techniczna i zadania naprawcze pozostaja otwarte.
+
+## Aktualizacja 2026-11-01 — podatnosci SQLite
+
+Po zastosowaniu poprzednich osmiu wyjatkow Trivy wykryl
+dwa nowe zagrozenia HIGH w libsqlite3-0 3.46.1-7+deb13u2.
+
+### CVE-2026-119373 — FTS5
+
+Podatnosc dotyczy operacji wyszukiwania pelnotekstowego
+FTS5 na specjalnie przygotowanych danych.
+
+SecTicket aktualnie nie wykorzystuje tabel wirtualnych FTS5.
+Wyszukiwanie zgloszen realizuje przez SQLAlchemy.
+
+Decyzja: czasowa tolerancja ryzyka w wersji demonstracyjnej,
+pod warunkiem utrzymania braku wykorzystania FTS5.
+
+### CVE-2026-119586 — SQLite .recover
+
+Podatnosc dotyczy przetwarzania spreparowanej bazy za pomoca
+polecenia .recover narzedzia konsolowego SQLite.
+
+SecTicket wykorzystuje SQLite poprzez biblioteke Python
+i SQLAlchemy. Aplikacja nie udostepnia uzytkownikom
+operacji .recover.
+
+Decyzja: czasowa tolerancja ryzyka w wersji demonstracyjnej,
+pod warunkiem nieudostepniania podatnego narzedzia CLI.
+
+### Warunki i ograniczenia
+
+- Zakres: demonstracyjny kontener SecTicket.
+- Wlasciciel ryzyka: zespol projektowy SecTicket.
+- Ponowny przeglad: 2026-11-08.
+- Wygasniecie wyjatkow: 2026-11-30.
+- Brak zgody na wdrozenie publicznie dostepnej produkcji.
+- Nowe podatnosci HIGH i CRITICAL nadal blokuja CI.
+- Oba CVE pozostaja w pelnym raporcie Trivy.
+- Dodanie FTS5 lub obslugi .recover wymaga ponownej oceny.
+- Dostepnosc poprawek SQLite nalezy monitorowac.
+
+Wyjatki oznaczaja czasowa decyzje dotyczaca ryzyka,
+a nie naprawienie podatnosci ani gwarancje bezpieczenstwa.
+
+Zrodla:
+https://security-tracker.debian.org/tracker/CVE-2026-119373
+https://security-tracker.debian.org/tracker/CVE-2026-119586

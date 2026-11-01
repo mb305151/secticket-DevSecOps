@@ -124,6 +124,37 @@ jobs:
           trivyignores: .github/trivy/no-exceptions
           cache: 'false'
 
+      - name: Sprawdz zalozenia wyjatkow SQLite
+        run: |
+          docker run --rm -i \
+            --network none \
+            --read-only \
+            --tmpfs /tmp:rw,nosuid,nodev,size=64m,mode=1777 \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            -e DATABASE_PATH=/tmp/sqlite-check.db \
+            -e SECRET_KEY=ci-only-dummy-secret \
+            --entrypoint python secticket:scan - <<'PYCODE'
+          import shutil
+          from sqlalchemy import text
+          from app import create_app
+          from app.extensions import db
+
+          assert shutil.which("sqlite3") is None
+
+          app = create_app()
+          with app.app_context():
+              db.create_all()
+              tables = db.session.execute(text(
+                  "SELECT name FROM sqlite_master "
+                  "WHERE type='table' "
+                  "AND upper(sql) LIKE '%USING FTS5%'"
+              )).all()
+              assert not tables, tables
+
+          print("[OK] Zalozenia wyjatkow SQLite zachowane")
+          PYCODE
+
       - name: Trivy - blokuj niezaakceptowane HIGH i CRITICAL
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:

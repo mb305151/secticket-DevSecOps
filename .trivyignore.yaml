@@ -37,3 +37,15 @@ vulnerabilities:
   - id: CVE-2026-9538
     expired_at: 2026-11-30
     statement: "Temporary demo-only exception; application does not process untrusted TAR archives through Perl."
+
+  - id: CVE-2026-119373
+    purls:
+      - "pkg:deb/debian/libsqlite3-0"
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception: no FTS5 tables or application full-text queries; review 2026-11-08."
+
+  - id: CVE-2026-119586
+    purls:
+      - "pkg:deb/debian/libsqlite3-0"
+    expired_at: 2026-11-30
+    statement: "Temporary demo-only exception: sqlite3 CLI and .recover workflow not used; review 2026-11-08."
