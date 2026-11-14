@@ -185,6 +185,20 @@ docker compose stop
 
 Ponowne uruchomienie: `./start.sh`.
 
+### Etap 3 — testy automatyczne
+
+Testy wykonujemy w **pytest** przez `./test.sh` w obrazie
+`secticket:test`. Obejmują one:
+
+- **13 jednostkowych**: długość i złożoność haseł, Unicode, Argon2id.
+- **5 opisanych integracyjnych**: logowanie, zgłoszenia, technik, profil i admin.
+- **3 scenariusze bezpieczeństwa**: IDOR, CSRF i escapowanie HTML.
+- **1 test /health**: kod HTTP 200 i poprawna odpowiedź JSON.
+
+Lokalnie 14.11.2026 zaliczono **49/49 testów** w 2,68 s.
+Szczegółowe przypadki, oczekiwane rezultaty, wyniki i ograniczenia:
+[raport testów etapu 3](ETAP3_RAPORT_TESTOW.md).
+
 ## Bezpieczeństwo i GitHub Actions
 
 Zastosowane mechanizmy obejmują m.in. hashowanie haseł **Argon2id**, kontrolę uprawnień po stronie serwera, CSRF, walidację danych, escapowanie treści HTML, limity prób logowania, zdarzenia audytowe i uruchamianie aplikacji w kontenerze jako użytkownik bez uprawnień roota.
@@ -218,6 +232,12 @@ Workflow `.github/workflows/ci.yml` uruchamia testy i kontrolę migracji, skan k
   bezpieczeństwa.
 - `.trivyignore.yaml` — czasowe wyjątki CVE wraz
   z uzasadnieniem i terminem wygaśnięcia.
+
+## Dokumenty etapu 3
+
+- `ETAP3_RAPORT_TESTOW.md` — scenariusze i wyniki testów.
+- `tests/test_security_unit.py` — 13 testów jednostkowych.
+- `tests/` — pozostałe testy integracyjne i bezpieczeństwa.
 
 ## Struktura repozytorium
 
