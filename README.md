@@ -203,7 +203,23 @@ Szczegółowe przypadki, oczekiwane rezultaty, wyniki i ograniczenia:
 
 Zastosowane mechanizmy obejmują m.in. hashowanie haseł **Argon2id**, kontrolę uprawnień po stronie serwera, CSRF, walidację danych, escapowanie treści HTML, limity prób logowania, zdarzenia audytowe i uruchamianie aplikacji w kontenerze jako użytkownik bez uprawnień roota.
 
-Workflow `.github/workflows/ci.yml` uruchamia testy i kontrolę migracji, skan kodu **Bandit**, audyt zależności **pip-audit** oraz skan obrazu Dockera **Trivy**.
+### CI — GitHub Actions
+
+Konfiguracja pipeline'u znajduje się w `.github/workflows/ci.yml`. GitHub Actions uruchamia workflow automatycznie po każdym **pushu** i **pull requeście**; można go również uruchomić ręcznie z zakładki **Actions**.
+
+Pipeline składa się z trzech niezależnych zadań:
+
+1. **Testy i migracje SQLite** — `./test.sh` buduje testowy etap obrazu Docker, instaluje zależności z `requirements.txt` i `requirements-dev.txt`, a następnie uruchamia wszystkie testy pytest z katalogu `tests/`. Zadanie buduje też obraz produkcyjny i sprawdza migracje na pustej bazie SQLite.
+2. **SAST i audyt zależności** — Bandit analizuje kod aplikacji, a `pip-audit` sprawdza zależności Pythona.
+3. **Skan obrazu kontenera** — Trivy sprawdza podatności obrazu Docker; niezaakceptowane podatności HIGH/CRITICAL powodują niepowodzenie zadania.
+
+Zadanie testów można powtórzyć lokalnie, jeśli Docker Engine jest uruchomiony:
+
+```bash
+./test.sh
+```
+
+Wyniki zadań i logi dostępne są w repozytorium GitHub w zakładce **Actions**. Zielony status oznacza powodzenie danego zadania; czerwony status zawiera log wskazujący krok, który zakończył się błędem.
 
 **Polityka CVE:** Trivy generuje pełny raport wykryć. Osobny krok blokuje niezaakceptowane podatności HIGH/CRITICAL. Wybrane, wcześniej ocenione CVE mają czasowe wyjątki zapisane w `.trivyignore.yaml`, z uzasadnieniem i terminem wygaśnięcia **30 listopada 2026 r.** Nie oznacza to usunięcia tych podatności ani dopuszczenia aplikacji do produkcyjnego wdrożenia w internecie. Nowe CVE spoza wyjątków nadal blokują pipeline. Założenia wyjątków wymagają ponownego przeglądu po zmianie obrazu lub funkcji aplikacji.
 
@@ -238,6 +254,11 @@ Workflow `.github/workflows/ci.yml` uruchamia testy i kontrolę migracji, skan k
 - `ETAP3_RAPORT_TESTOW.md` — scenariusze i wyniki testów.
 - `tests/test_security_unit.py` — 13 testów jednostkowych.
 - `tests/` — pozostałe testy integracyjne i bezpieczeństwa.
+
+## Dokumenty etapu 4
+
+- `README.md` — opis narzędzia CI, wyzwalaczy workflow i przebiegu pipeline'u.
+- `.github/workflows/ci.yml` — konfiguracja GitHub Actions.
 
 ## Struktura repozytorium
 
